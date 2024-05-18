@@ -1,0 +1,63 @@
+import SwiftUI
+
+// Create a CallWaitingQueue class to manage the waiting queue
+class CallWaitingQueue: ObservableObject {
+    @Published private var queue: [String] = []
+
+    func addCallerToQueue(callerID: String) {
+        queue.append(callerID)
+    }
+
+    func dequeueCaller() -> String? {
+        if !queue.isEmpty {
+            return queue.removeFirst()
+        }
+        return nil
+    }
+
+    func queuePosition(for callerID: String) -> Int? {
+        return queue.firstIndex(of: callerID)
+    }
+}
+
+struct CallerQueueView: View {
+    @State private var callerName: String = ""
+
+    @EnvironmentObject var callWaitingQueue: CallWaitingQueue
+
+    var body: some View {
+        VStack {
+            Text("Call Waiting Room")
+                .font(.title)
+                .padding()
+
+            TextField("Enter Your Name", text: $callerName)
+                .padding()
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+
+            Button("Join Queue") {
+                callWaitingQueue.addCallerToQueue(callerID: callerName)
+            }
+            .padding()
+            .foregroundColor(.white)
+            .background(Color.blue)
+            .cornerRadius(8.0)
+
+            if let position = callWaitingQueue.queuePosition(for: callerName) {
+                Text("You are currently in position \(position + 1) in the waiting room.")
+                    .padding()
+            }
+        }
+        .padding()
+    }
+}
+
+struct WaitingRoomApp: App {
+    @StateObject var callWaitingQueue = CallWaitingQueue()
+
+    var body: some Scene {
+        WindowGroup {
+            CallerQueueView().environmentObject(callWaitingQueue)
+        }
+    }
+}

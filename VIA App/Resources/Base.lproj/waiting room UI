@@ -1,0 +1,44 @@
+import SwiftUI
+
+struct CallerQueueView: View {
+    @State private var callerName: String = ""
+    @State private var queuePosition: Int? = nil
+
+    @ObservedObject var callWaitingRoom = CallWaitingRoom()
+
+    var body: some View {
+        VStack {
+            Text("Call Waiting Room")
+                .font(.title)
+                .padding()
+
+            TextField("Enter Your Name", text: $callerName)
+                .padding()
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+
+            Button("Join Queue") {
+                callWaitingRoom.addCallerToQueue(callerID: callerName)
+                queuePosition = callWaitingRoom.queuePosition(for: callerName)
+            }
+            .padding()
+            .foregroundColor(.white)
+            .background(Color.blue)
+            .cornerRadius(8.0)
+
+            if let position = queuePosition {
+                Text("You are currently in position \(position) in the waiting room.")
+                    .padding()
+            }
+        }
+        .padding()
+    }
+}
+
+@main
+struct WaitingRoomApp: App {
+    var body: some Scene {
+        WindowGroup {
+            CallerQueueView()
+        }
+    }
+}
